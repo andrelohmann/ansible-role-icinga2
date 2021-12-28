@@ -1,0 +1,43 @@
+---
+
+- name: install packages
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - apt-transport-https
+
+- name: Add an Apt signing key, uses whichever key is at the URL
+  apt_key:
+    url: https://packages.icinga.com/icinga.key
+    state: present
+
+- name: Add icinga2 repository
+  apt_repository:
+    repo: deb https://packages.icinga.com/ubuntu icinga-{{ ansible_distribution_release }} main
+    state: present
+    filename: icinga2
+
+- name: install icinga2
+  include: icinga2.yml
+  when: icinga2_install_icinga2|bool
+
+- name: install monitoring plugins
+  include: monitoring.yml
+  when: icinga2_install_monitoring|bool
+
+- name: install icinga web 2
+  include: web.yml
+  when: icinga2_install_web|bool
+
+- name: initialize icinga web 2 with basic auth
+  include: web_basicauth.yml
+  when: icinga2_install_web|bool and icingaweb2_initialize_basicauth|bool
+
+...

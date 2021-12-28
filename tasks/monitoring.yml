@@ -1,0 +1,26 @@
+---
+
+- name: install monitoring-plugins
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - monitoring-plugins
+
+- name: just force systemd to reread configs
+  systemd:
+    daemon_reload: yes
+
+- name: restart icinga2
+  systemd:
+    name: icinga2
+    state: restarted
+    enabled: yes
+
+...

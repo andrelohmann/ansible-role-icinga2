@@ -1,0 +1,108 @@
+---
+
+- name: setup basic auth creds
+  shell: htpasswd -cb /etc/icingaweb2/.http-users {{ icingaweb2_basicauth_user }} {{ icingaweb2_basicauth_password }}
+  args:
+    executable: /bin/bash
+
+- name: set the api web user password
+  blockinfile:
+    path: /etc/apache2/conf-available/icingaweb2.conf
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+        AuthType Basic
+        AuthName "Icinga Web 2"
+        AuthUserFile /etc/icingaweb2/.http-users
+        Require valid-user
+    insertbefore: "^</Directory>"
+
+- name: create authentication.ini
+  template:
+    src: authentication.ini
+    dest: /etc/icingaweb2/authentication.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create config.ini
+  template:
+    src: config.ini
+    dest: /etc/icingaweb2/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create resources.ini
+  template:
+    src: resources.ini
+    dest: /etc/icingaweb2/resources.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create roles.ini
+  template:
+    src: roles.ini
+    dest: /etc/icingaweb2/roles.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create the monitoring config folder
+  file:
+    path: /etc/icingaweb2/modules/monitoring
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 0770
+
+- name: create modules/monitoring/backends.ini
+  template:
+    src: modules/monitoring/backends.ini
+    dest: /etc/icingaweb2/modules/monitoring/backends.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create modules/monitoring/commandtransports.ini
+  template:
+    src: modules/monitoring/commandtransports.ini
+    dest: /etc/icingaweb2/modules/monitoring/commandtransports.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create modules/monitoring/config.ini
+  template:
+    src: modules/monitoring/config.ini
+    dest: /etc/icingaweb2/modules/monitoring/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: copy icingaweb2.sql
+  copy:
+    src: icingaweb2.sql
+    dest: /etc/icingaweb2/icingaweb2.sql
+    owner: root
+    group: root
+    mode: 0600
+
+- name: run the mysql schema
+  shell: mysql -u {{ icingaweb2_db_user }} -p{{ icingaweb2_db_password }} {{ icingaweb2_db_name }} < /etc/icingaweb2/icingaweb2.sql 2> /dev/null
+  args:
+    executable: /bin/bash
+
+- name: enable monitoring module
+  shell: icingacli module enable monitoring
+  args:
+    executable: /bin/bash
+
+- name: restart apache2
+  systemd:
+    name: apache2
+    state: restarted
+
+# icingacli module enable monitoring
+
+...

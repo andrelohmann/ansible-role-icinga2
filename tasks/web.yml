@@ -1,0 +1,33 @@
+---
+
+- name: install icingaweb2
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - icingaweb2
+    - libapache2-mod-php
+    - icingacli
+
+- name: set the api web user password
+  blockinfile:
+    path: /etc/icinga2/conf.d/api-users.conf
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      object ApiUser "{{ icinga2_api_web_user }}" {
+        password = "{{ icinga2_api_web_password }}"
+        permissions = [ "status/query", "actions/*", "objects/modify/*", "objects/query/*" ]
+      }
+
+- name: restart icinga2
+  systemd:
+    name: icinga2
+    state: restarted
+
+...

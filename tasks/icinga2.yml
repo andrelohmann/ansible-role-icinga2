@@ -1,0 +1,104 @@
+---
+
+- name: install icinga2
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - icinga2
+    - icinga2-ido-mysql
+
+# /etc/dbconfig-common/icinga2-ido-mysql.conf
+- name: set the db host
+  lineinfile:
+    path: /etc/dbconfig-common/icinga2-ido-mysql.conf
+    regexp: '^dbc_dbserver='
+    line: "dbc_dbserver='{{ icinga2_db_host }}'"
+
+- name: set the db port
+  lineinfile:
+    path: /etc/dbconfig-common/icinga2-ido-mysql.conf
+    regexp: '^dbc_dbport='
+    line: "dbc_dbport='{{ icinga2_db_port }}'"
+
+- name: set the db name
+  lineinfile:
+    path: /etc/dbconfig-common/icinga2-ido-mysql.conf
+    regexp: '^dbc_dbname='
+    line: "dbc_dbname='{{ icinga2_db_name }}'"
+
+- name: set the db user
+  lineinfile:
+    path: /etc/dbconfig-common/icinga2-ido-mysql.conf
+    regexp: '^dbc_dbuser='
+    line: "dbc_dbuser='{{ icinga2_db_user }}'"
+
+- name: set the db password
+  lineinfile:
+    path: /etc/dbconfig-common/icinga2-ido-mysql.conf
+    regexp: '^dbc_dbpass='
+    line: "dbc_dbpass='{{ icinga2_db_password }}'"
+
+# /etc/icinga2/features-available/ido-mysql.conf
+- name: set the feature db host
+  lineinfile:
+    path: /etc/icinga2/features-available/ido-mysql.conf
+    regexp: '^  host = "'
+    line: '  host = "{{ icinga2_db_host }}"'
+
+- name: set the feature db name
+  lineinfile:
+    path: /etc/icinga2/features-available/ido-mysql.conf
+    regexp: '^  database = "'
+    line: '  database = "{{ icinga2_db_name }}"'
+
+- name: set the feature db user
+  lineinfile:
+    path: /etc/icinga2/features-available/ido-mysql.conf
+    regexp: '^  user = "'
+    line: '  user = "{{ icinga2_db_user }}"'
+
+- name: set the feature db password
+  lineinfile:
+    path: /etc/icinga2/features-available/ido-mysql.conf
+    regexp: '^  password = "'
+    line: '  password = "{{ icinga2_db_password }}"'
+
+- name: run the mysql schema
+  shell: mysql -u {{ icinga2_db_user }} -p{{ icinga2_db_password }} {{ icinga2_db_name }} < /usr/share/icinga2-ido-mysql/schema/mysql.sql 2> /dev/null
+  args:
+    executable: /bin/bash
+
+- name: enable ido-mysql
+  shell: icinga2 feature enable ido-mysql
+  args:
+    executable: /bin/bash
+
+- name: set up the rest api
+  shell: icinga2 api setup
+  args:
+    executable: /bin/bash
+
+- name: set the api root user password
+  lineinfile:
+    path: /etc/icinga2/conf.d/api-users.conf
+    insertafter: '^object ApiUser "root" {'
+    regexp: '^  password = "'
+    line: '  password = "{{ icinga2_api_root_password }}"'
+
+- name: just force systemd to reread configs
+  systemd:
+    daemon_reload: yes
+
+- name: restart icinga2
+  systemd:
+    name: icinga2
+    state: restarted
+
+...
