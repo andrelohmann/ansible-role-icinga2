@@ -1,0 +1,149 @@
+---
+
+# https://icinga.com/blog/2019/06/17/icinga-reporting-hands-on/
+
+- name: install icinga2
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - apt-transport-https
+
+- name: Add chrome repository key
+  apt_key:
+    url: https://dl-ssl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: Adding chrome repository
+  apt_repository:
+    repo: "deb http://dl.google.com/linux/chrome/deb/ stable main"
+    state: present
+
+- name: Install chrome
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - google-chrome-stable
+
+- name: Clone the pdfexport Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-pdfexport
+    dest: /usr/share/icingaweb2/modules/pdfexport
+
+- name: Clone the reporting Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-reporting
+    dest: /usr/share/icingaweb2/modules/reporting
+
+- name: Clone the idoreports Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-idoreports
+    dest: /usr/share/icingaweb2/modules/idoreports
+
+- name: set the db host
+  lineinfile:
+    path: /etc/mysql/conf.d/mysql.cnf
+    regexp: '^log_bin_trust_function_creators='
+    line: "log_bin_trust_function_creators=1"
+    insertafter: "[mysqld]"
+
+- name: restart mysql
+  systemd:
+    name: mysql
+    state: restarted
+
+- name: run the mysql schema
+  shell: mysql -u {{ icingaweb2_reporting_db_user }} -p{{ icingaweb2_reporting_db_password }} {{ icingaweb2_reporting_db_name }} < /usr/share/icingaweb2/modules/reporting/schema/mysql.sql 2> /dev/null
+  args:
+    executable: /bin/bash
+
+- name: run the mysql schema
+  shell: mysql -u {{ icinga2_db_user }} -p{{ icinga2_db_password }} {{ icinga2_db_name }} < /usr/share/icingaweb2/modules/idoreports/schema/mysql/slaperiods.sql 2> /dev/null
+  args:
+    executable: /bin/bash
+
+- name: run the mysql schema
+  shell: mysql -u {{ icinga2_db_user }} -p{{ icinga2_db_password }} {{ icinga2_db_name }} < /usr/share/icingaweb2/modules/idoreports/schema/mysql/get_sla_ok_percent.sql 2> /dev/null
+  args:
+    executable: /bin/bash
+
+- name: create the monitoring config folder
+  file:
+    path: /etc/icingaweb2/modules/reporting
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: create modules/reporting/config.ini
+  template:
+    src: modules/reporting/config.ini
+    dest: /etc/icingaweb2/modules/reporting/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create the pdfexport config folder
+  file:
+    path: /etc/icingaweb2/modules/pdfexport
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: create modules/pdfexport/config.ini
+  template:
+    src: modules/pdfexport/config.ini
+    dest: /etc/icingaweb2/modules/pdfexport/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: enable pdfexport module
+  shell: icingacli module enable pdfexport
+  args:
+    executable: /bin/bash
+
+- name: enable reporting module
+  shell: icingacli module enable reporting
+  args:
+    executable: /bin/bash
+
+- name: enable idoreports module
+  shell: icingacli module enable idoreports
+  args:
+    executable: /bin/bash
+
+- name: copy icinga-reporting.service
+  copy:
+    src: /usr/share/icingaweb2/modules/reporting/config/systemd/icinga-reporting.service
+    dest: /etc/systemd/system/icinga-reporting.service
+    owner: root
+    group: root
+    mode: 0644
+    remote_src: yes
+
+- name: just force systemd to reread configs
+  systemd:
+    daemon_reload: yes
+
+- name: restart icinga-reporting
+  systemd:
+    name: icinga-reporting
+    state: started
+    enabled: yes
+
+...

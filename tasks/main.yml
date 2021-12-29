@@ -45,7 +45,11 @@
   when: icingaweb2_install_web|bool and icingaweb2_initialize_dbauth|bool and not icingaweb2_initialize_basicauth|bool
 
 - name: install monitoring module
-  include: monitoring_module.yml
-  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_monitoring_module|bool
+  include: module_monitoring.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_monitoring|bool
+
+- name: install reporting module
+  include: module_reporting.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_reporting|bool
 
 ...

@@ -41,7 +41,15 @@ Role Variables
     icingaweb2_default_user: icingaadmin
     icingaweb2_default_password: icingaadmin
     # Install the monitoring module (either basicauth or database authentication is necessary)
-    icingaweb2_install_monitoring_module: False
+    icingaweb2_install_module_monitoring: False
+    # Install the reporting module (either basicauth or database authentication is necessary)
+    icingaweb2_install_module_reporting: False
+    # Icinga Web 2 requires its own database for Access management
+    icingaweb2_reporting_db_host: localhost
+    icingaweb2_reporting_db_port: 3306
+    icingaweb2_reporting_db_name: reporting
+    icingaweb2_reporting_db_user: reporting
+    icingaweb2_reporting_db_password: reporting
 
 
 Example Playbook
