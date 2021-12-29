@@ -1,21 +1,5 @@
 ---
 
-- name: setup basic auth creds
-  shell: htpasswd -cb /etc/icingaweb2/.http-users {{ icingaweb2_default_user }} {{ icingaweb2_default_password }}
-  args:
-    executable: /bin/bash
-
-- name: set the api web user password
-  blockinfile:
-    path: /etc/apache2/conf-available/icingaweb2.conf
-    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
-    block: |
-        AuthType Basic
-        AuthName "Icinga Web 2"
-        AuthUserFile /etc/icingaweb2/.http-users
-        Require valid-user
-    insertbefore: "^</Directory>"
-
 - name: create authentication.ini
   template:
     src: authentication.ini
@@ -28,6 +12,14 @@
   template:
     src: config.ini
     dest: /etc/icingaweb2/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create groups.ini
+  template:
+    src: groups.ini
+    dest: /etc/icingaweb2/groups.ini
     owner: www-data
     group: icingaweb2
     mode: 0660
@@ -53,11 +45,20 @@
   args:
     executable: /bin/bash
 
+- name: create the password hash
+  shell: php -r 'echo password_hash("{{ icingaweb2_default_password }}", PASSWORD_DEFAULT);'
+  args:
+    executable: /bin/bash
+  register: _password_hash
+
+- name: set the initial db user
+  shell: mysql -u {{ icingaweb2_db_user }} -p{{ icingaweb2_db_password }} {{ icingaweb2_db_name }} -Ns -e 'INSERT INTO icingaweb_user (name, active, password_hash) VALUES ("{{ icingaweb2_default_user }}", 1, "{{ _password_hash.stdout }}")'
+  args:
+    executable: /bin/bash
+
 - name: restart apache2
   systemd:
     name: apache2
     state: restarted
-
-# icingacli module enable monitoring
 
 ...

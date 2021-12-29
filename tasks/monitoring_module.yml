@@ -1,0 +1,40 @@
+---
+
+- name: create the monitoring config folder
+  file:
+    path: /etc/icingaweb2/modules/monitoring
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 0770
+
+- name: create modules/monitoring/backends.ini
+  template:
+    src: modules/monitoring/backends.ini
+    dest: /etc/icingaweb2/modules/monitoring/backends.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create modules/monitoring/commandtransports.ini
+  template:
+    src: modules/monitoring/commandtransports.ini
+    dest: /etc/icingaweb2/modules/monitoring/commandtransports.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: create modules/monitoring/config.ini
+  template:
+    src: modules/monitoring/config.ini
+    dest: /etc/icingaweb2/modules/monitoring/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: enable monitoring module
+  shell: icingacli module enable monitoring
+  args:
+    executable: /bin/bash
+
+...

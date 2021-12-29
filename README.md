@@ -12,7 +12,6 @@ Role Variables
 
     icinga2_install_icinga2: True # Install Icinga2
     icinga2_install_monitoring: True # Install Monitoring Plugins (https://www.monitoring-plugins.org/)
-    icinga2_install_web: True # Install Icinga Web 2
 
     # Icinga2 stores its data in a database
     icinga2_db_host: localhost
@@ -25,6 +24,9 @@ Role Variables
     # Set the credentials for the icinga web 2 access to the icinnga2 api (necessary for the monitoring module)
     icinga2_api_web_user: icingaweb2
     icinga2_api_web_password: icingaweb2
+
+    icingaweb2_install_web: True # Install Icinga Web 2
+
     # Icinga Web 2 requires its own database for Access management
     icingaweb2_db_host: localhost
     icingaweb2_db_port: 3306
@@ -32,10 +34,15 @@ Role Variables
     icingaweb2_db_user: icingaweb2
     icingaweb2_db_password: icingaweb2
 
-    # Initialize Icinga Web 2 with basicauth authentication and a basic setup
-    icingaweb2_initialize_basicauth: True
-    icingaweb2_basicauth_user: icingaadmin
-    icingaweb2_basicauth_password: icingaadmin
+    # Initialize Icinga Web 2 with basicauth or database authentication (only one is possible)
+    icingaweb2_initialize_basicauth: False
+    icingaweb2_initialize_dbauth: False
+    # default admin user for the authentification
+    icingaweb2_default_user: icingaadmin
+    icingaweb2_default_password: icingaadmin
+    # Install the monitoring module (either basicauth or database authentication is necessary)
+    icingaweb2_install_monitoring_module: False
+
 
 Example Playbook
 ----------------

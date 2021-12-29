@@ -34,10 +34,18 @@
 
 - name: install icinga web 2
   include: web.yml
-  when: icinga2_install_web|bool
+  when: icingaweb2_install_web|bool
 
 - name: initialize icinga web 2 with basic auth
   include: web_basicauth.yml
-  when: icinga2_install_web|bool and icingaweb2_initialize_basicauth|bool
+  when: icingaweb2_install_web|bool and icingaweb2_initialize_basicauth|bool and not icingaweb2_initialize_dbauth|bool
+
+- name: initialize icinga web 2 with db auth
+  include: web_dbauth.yml
+  when: icingaweb2_install_web|bool and icingaweb2_initialize_dbauth|bool and not icingaweb2_initialize_basicauth|bool
+
+- name: install monitoring module
+  include: monitoring_module.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_monitoring_module|bool
 
 ...
