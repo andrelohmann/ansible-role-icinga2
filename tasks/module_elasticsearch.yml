@@ -13,7 +13,7 @@
     state: directory
     owner: www-data
     group: icingaweb2
-    mode: 2770
+    mode: 0770
 
 - name: create modules/elasticsearch/config.ini
   template:

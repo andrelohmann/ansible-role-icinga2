@@ -86,7 +86,7 @@
     state: directory
     owner: www-data
     group: icingaweb2
-    mode: 2770
+    mode: 0770
 
 - name: create modules/reporting/config.ini
   template:
@@ -102,7 +102,7 @@
     state: directory
     owner: www-data
     group: icingaweb2
-    mode: 2770
+    mode: 0770
 
 - name: create modules/pdfexport/config.ini
   template:
