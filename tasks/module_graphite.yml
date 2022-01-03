@@ -1,0 +1,49 @@
+---
+
+# https://icinga.com/docs/icinga-module-for-graphite/latest/doc/01-About/
+
+- name: create features-available/graphite.conf
+  template:
+    src: features-available/graphite.conf
+    dest: /etc/icinga2/features-available/graphite.conf
+    owner: nagios
+    group: nagios
+    mode: 0744
+
+- name: enable icinga2 feature graphite
+  shell: icinga2 feature enable graphite
+  args:
+    executable: /bin/bash
+
+- name: restart icinga2
+  systemd:
+    name: icinga2
+    state: restarted
+
+- name: Clone the graphite Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-graphite
+    dest: /usr/share/icingaweb2/modules/graphite
+
+- name: create the graphite config folder
+  file:
+    path: /etc/icingaweb2/modules/graphite
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: create modules/graphite/config.ini
+  template:
+    src: modules/graphite/config.ini
+    dest: /etc/icingaweb2/modules/graphite/config.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: enable graphite module
+  shell: icingacli module enable graphite
+  args:
+    executable: /bin/bash
+
+...

@@ -34,11 +34,40 @@ icingaweb2_default_password: icingaadmin
 icingaweb2_install_module_monitoring: False
 # Install the reporting module (either basicauth or database authentication is necessary)
 icingaweb2_install_module_reporting: False
-# Icinga Web 2 requires its own database for Access management
+# the reporting module requires its own database
 icingaweb2_reporting_db_host: localhost
 icingaweb2_reporting_db_port: 3306
 icingaweb2_reporting_db_name: reporting
 icingaweb2_reporting_db_user: reporting
 icingaweb2_reporting_db_password: reporting
+# Install the businessprocess module (either basicauth or database authentication is necessary)
+icingaweb2_install_module_businessprocess: False
+# Install the x509 (Icinga Certificate Monitoring) module (either basicauth or database authentication is necessary)
+icingaweb2_install_module_x509: False
+# the x509 module requires its own database
+icingaweb2_x509_db_host: localhost
+icingaweb2_x509_db_port: 3306
+icingaweb2_x509_db_name: x509
+icingaweb2_x509_db_user: x509
+icingaweb2_x509_db_password: x509
+# Install the graphite module (either basicauth or database authentication is necessary)
+icingaweb2_install_module_graphite: False
+# the graphite module needs to connect to graphite
+icingaweb2_graphite_host: localhost
+icingaweb2_graphite_port: 2003
+icingaweb2_graphite_web_host: localhost
+icingaweb2_graphite_web_port: 80
+# Install the elasticsearch module (either basicauth or database authentication is necessary)
+icingaweb2_install_module_elasticsearch: False
+# the elasticsearch module needs to connect to elasticsearch
+icingaweb2_elasticsearch_protocol: http
+icingaweb2_elasticsearch_host: localhost
+icingaweb2_elasticsearch_port: 9200
+icingaweb2_elasticsearch_user: ""
+icingaweb2_elasticsearch_password: ""
+icingaweb2_elasticsearch_ca: ""
+icingaweb2_elasticsearch_client_certificate: ""
+icingaweb2_elasticsearch_client_private_key: ""
+
 
 ...

@@ -1,0 +1,31 @@
+---
+
+# https://icinga.com/docs/icinga-module-for-elasticsearch/latest/doc/02-Installation/
+
+- name: Clone the elasticsearch Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-elasticsearch
+    dest: /usr/share/icingaweb2/modules/elasticsearch
+
+- name: create the elasticsearch config folder
+  file:
+    path: /etc/icingaweb2/modules/elasticsearch
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: create modules/elasticsearch/config.ini
+  template:
+    src: modules/elasticsearch/instances.ini
+    dest: /etc/icingaweb2/modules/elasticsearch/instances.ini
+    owner: www-data
+    group: icingaweb2
+    mode: 0660
+
+- name: enable elasticsearch module
+  shell: icingacli module enable elasticsearch
+  args:
+    executable: /bin/bash
+
+...

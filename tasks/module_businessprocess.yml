@@ -1,0 +1,31 @@
+---
+
+# https://icinga.com/docs/icinga-business-process-modelling/latest/doc/02-Installation/
+
+- name: Clone the businessprocess Module
+  git:
+    repo: https://github.com/Icinga/icingaweb2-module-businessprocess
+    dest: /usr/share/icingaweb2/modules/businessprocess
+
+- name: create the businessprocess config folder
+  file:
+    path: /etc/icingaweb2/modules/businessprocess
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: create the businessprocess/processes config folder
+  file:
+    path: /etc/icingaweb2/modules/businessprocess/processes
+    state: directory
+    owner: www-data
+    group: icingaweb2
+    mode: 2770
+
+- name: enable businessprocess module
+  shell: icingacli module enable businessprocess
+  args:
+    executable: /bin/bash
+
+...

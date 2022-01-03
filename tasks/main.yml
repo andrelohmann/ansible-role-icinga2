@@ -52,4 +52,20 @@
   include: module_reporting.yml
   when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_reporting|bool
 
+- name: install businessprocess module
+  include: module_businessprocess.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_businessprocess|bool
+
+- name: install x509 module
+  include: module_x509.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_x509|bool
+
+- name: install graphite module
+  include: module_graphite.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_graphite|bool
+
+- name: install elasticsearch module
+  include: module_elasticsearch.yml
+  when: icingaweb2_install_web|bool and (icingaweb2_initialize_dbauth|bool or icingaweb2_initialize_basicauth|bool) and icingaweb2_install_module_elasticsearch|bool
+
 ...
